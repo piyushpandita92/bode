@@ -4,10 +4,6 @@ This module is called bode
 
 Bayesian Optimal Design of Experiments for Inferring the Expected Value of a Black-box Function
 
-This package was used in following paper, demonstrating the details of the methodology:
-
-
-Pandita, Piyush, Ilias Bilionis, and Jitesh Panchal. "Bayesian Optimal Design of Experiments for Inferring the Expected Value of a Black-box Function."
  
 It needs the support of the following PYTHON packages.
 1. pyDOE 
@@ -24,7 +20,7 @@ or clone the repository and run python setup.py install.
 Import the package like as follows:
  ```import bode```
 
-The simple examples ex1.py, ex2.py provide a self explanatory overview of using bode.
+The simple examples samp_ex1.py, samp_ex2.py provide a self explanatory overview of using bode.
 This code works for estimating/inferring the expectation of a function (so the user would have to include that in their function object).
 
 The user mainly needs to specify the objective function ```obj_func``` as an object, number of iterations (samples to be collected depending on the budget) ```max_it```, number of designs of the discretized input space (for calculating the value of the EKLD criterion) ```X_design```. 
