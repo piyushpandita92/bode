@@ -10,13 +10,12 @@ import pdb
 import GPy
 import time
 import itertools
-import design
 import bode
 from cycler import cycler
 from scipy.stats import norm
 from scipy.stats import uniform
 from scipy.stats import beta
-
+from pyDOE import *
 
 class Ex1Func(object):
     def __init__(self, sigma_noise=lambda x: 0.5, mu=0, sigma=1):
@@ -39,7 +38,7 @@ if __name__=='__main__':
     sigma = 0.03
     objective_true = Ex1Func(sigma_noise=sigma_true, mu=mu, sigma=sigma)
     objective = Ex1Func(sigma_noise=sigma_noise, mu=mu, sigma=sigma)
-    X_init = design.latin_center(n, 1)
+    X_init = lhs(dim, n)
     Y_init = np.array([objective(x) for x in X_init])[:, None]
     out_dir = 'klsamp_n={0:d}_sigma={1:s}'.format(n, str(noise))
     num_samp = 30
