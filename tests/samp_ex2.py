@@ -66,7 +66,7 @@ if __name__=='__main__':
 	num_it = 50
 	quad_points = np.linspace(0, 1, num_quad_points)[:, None] # Linearly space points
 	quad_points_weight = np.ones(num_quad_points)
-	kls = bode.KLSampler(X_init, Y_init, x_hyp, 
+	kls = bode.KLSampler(X_init, Y_init, 
 		model_kern=GPy.kern.RBF, 
 		bounds=[(0, 1)] * X_init.shape[1], 
 		obj_func=objective, 
