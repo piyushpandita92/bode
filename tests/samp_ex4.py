@@ -12,7 +12,7 @@ import pdb
 import GPy
 import time
 import itertools
-from sampler import *
+import bode
 from cycler import cycler
 import pickle
 from scipy.stats import truncnorm
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 		shutil.rmtree(out_dir)
 	os.makedirs(out_dir)
 	x_hyp = lhs(dim, 1)
-	kls = KLSampler(X_init, Y_init, x_hyp, 
+	kls = bode.KLSampler(X_init, Y_init, x_hyp, 
 		model_kern=GPy.kern.RBF, 
 		bounds=[(0,1)] * X_init.shape[1], 
 		obj_func=objective,
