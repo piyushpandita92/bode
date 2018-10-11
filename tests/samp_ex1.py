@@ -12,7 +12,6 @@ import pdb
 import GPy
 import time
 import itertools
-import design
 import bode
 from cycler import cycler
 from scipy.stats import truncnorm
@@ -34,6 +33,7 @@ class Ex1Func(object):
 
 if __name__=='__main__':
 	np.random.seed(1223)
+	dim = 1
 	n = 5
 	noise = 0
 	noise_true = 0
@@ -41,7 +41,7 @@ if __name__=='__main__':
 	sigma_true = eval('lambda x: ' + str(noise_true))
 	objective_true = Ex1Func(sigma=sigma_true)
 	objective = Ex1Func(sigma=sigma)
-	X_init = design.latin_center(n, 1)
+	X_init = lhs(dim, n)
 	Y_init = np.array([objective(x) for x in X_init])[:, None]	
 	num_quad_points = 500
 	quad_points = np.linspace(0, 1, num_quad_points)[:, None]
