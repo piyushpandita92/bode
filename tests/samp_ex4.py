@@ -71,7 +71,7 @@ if __name__ == '__main__':
 		shutil.rmtree(out_dir)
 	os.makedirs(out_dir)
 	x_hyp = lhs(dim, 1)
-	kls = bode.KLSampler(X_init, Y_init, x_hyp, 
+	kls = bode.KLSampler(X_init, Y_init, 
 		model_kern=GPy.kern.RBF, 
 		bounds=[(0,1)] * X_init.shape[1], 
 		obj_func=objective,
