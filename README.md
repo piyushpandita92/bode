@@ -13,7 +13,7 @@ It needs the support of the following PYTHON packages.
 5. tqdm
 
 To install the package do the following:
-pip install git+git://github.com/piyushpandita92/pydes.git  
+pip install git+git://github.com/piyushpandita92/bode.git  
 
 or clone the repository and run python setup.py install.
 
