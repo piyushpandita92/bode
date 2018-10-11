@@ -12,13 +12,12 @@ import pdb
 import GPy
 import time
 import itertools
-import design
 import bode
 from cycler import cycler
 from scipy.stats import norm
 from scipy.stats import uniform
 from scipy.stats import beta
-
+from pyDOE import *
 
 class Ex2Func(object):
     def __init__(self, sigma_noise=lambda x: 0.5, mu1=0, sigma1=1, mu2=0.5, sigma2=1):
@@ -34,6 +33,7 @@ class Ex2Func(object):
 
 if __name__=='__main__':
 	np.random.seed(1263)
+	dim = 1
 	n = 5
 	n_true = 10000
 	noise = 0
@@ -46,11 +46,10 @@ if __name__=='__main__':
 	sigma2 = 0.05
 	objective_true = Ex2Func(sigma_noise=sigma_true, mu1=mu1, sigma1=sigma1, mu2=mu2, sigma2=sigma2)
 	objective = Ex2Func(sigma_noise=sigma_noise, mu1=mu1, sigma1=sigma1, mu2=mu2, sigma2=sigma2)
-	X_true = design.latin_center(n_true, 1)
+	X_true = lhs(dim, n_true)
 	Y_true = np.array([objective(x) for x in X_true])[:, None]
 	true_mean = np.mean(Y_true)
-	print true_mean
-	X_init = design.latin_center(n, 1)
+	X_init = lhs(dim, n)
 	Y_init = np.array([objective(x) for x in X_init])[:, None]
 	out_dir = 'ex2_n={0:d}_sigma={1:s}'.format(n, str(noise))
 	if os.path.isdir(out_dir):
