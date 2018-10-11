@@ -55,7 +55,7 @@ if __name__=='__main__':
 	idx_quad = np.argsort(quad_points, axis=0)
 	num_it = 50
 	x_hyp = np.array([[.6]])
-	kls = bode.KLSampler(X_init, Y_init, x_hyp, 
+	kls = bode.KLSampler(X_init, Y_init, 
 		model_kern=GPy.kern.RBF, 
 		bounds=[(0,1)] * X_init.shape[1], 
 		obj_func=objective, 
