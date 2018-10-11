@@ -13,7 +13,7 @@ import GPy
 import time
 import itertools
 import design
-from sampler import *
+import bode
 from cycler import cycler
 from scipy.stats import norm
 from scipy.stats import uniform
@@ -66,7 +66,7 @@ if __name__=='__main__':
 	num_it = 50
 	quad_points = np.linspace(0, 1, num_quad_points)[:, None] # Linearly space points
 	quad_points_weight = np.ones(num_quad_points)
-	kls = KLSampler(X_init, Y_init, x_hyp, 
+	kls = bode.KLSampler(X_init, Y_init, x_hyp, 
 		model_kern=GPy.kern.RBF, 
 		bounds=[(0, 1)] * X_init.shape[1], 
 		obj_func=objective, 
