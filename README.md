@@ -28,9 +28,9 @@ The user mainly needs to specify the objective function ```obj_func``` as an obj
 Note: The methodology should be used with the inputs transformed to [0, 1]^{d} cube and outputs roughly normalized to a standard normal.
 
 For sequential design  (one suggested design/experiment at a time):
-Running the code: the examples in the ```tests``` directory can be called from the command line with a set of arguments as follows: python tests/ex1.py .
+Running the code: the examples in the ```tests``` directory can be called from the command line with a set of arguments as follows: python tests/samp_ex1.py .
 
 
-After each iteration a plot depicting the state of the function is generated for 1d problems, this can be controlled by a make_plots flag.  
+After each iteration a plot depicting the state of the function is generated for 1d problems, this can be controlled by a ```plots``` flag set to 0 or 1.  
 
 More documentation to follow.
