@@ -385,23 +385,6 @@ class KLSampler(object):
 			samp_hyp[j, ] = self.model[0].predict(np.atleast_2d(x), include_likelihood=False)[0][0] + np.sum(np.multiply(np.multiply(sample_xi_hyp, (np.sqrt(val_trunc))[:, None]), (eig_funcs_f_hyp[j, :])[:, None]))
 		return samp_hyp, y_hyp, val_trunc, eig_funcs_f_hyp
 
-	# def get_params_2_sa(self, val_trunc, eig_funcs_hyp, phi_x_dx, model):
-	# 	"""
-	# 	Computes the variance of the distribution conditioned on the hypothetical observation.
-	# 	"""
-	# 	sigma_inv = np.multiply(np.matmul(np.sqrt(val_trunc)[:, None], np.sqrt(val_trunc)[None, :]), np.matmul(eig_funcs_hyp[:, None], eig_funcs_hyp[None, :])) # using sherman morrison formula
-	# 	# sigma_inv_2 = sigma_inv / (self.nugget ** 2)					 # this is the epsilon squared of our derivation
-	# 	# sigma_inv_1 = np.eye(len(val_trunc))
-	# 	# sigma_3 = np.linalg.inv(sigma_inv_1 + sigma_inv_2)
-	# 	sigma_3 = np.eye(len(val_trunc)) - (sigma_inv / ((model.likelihood.variance) + (np.matmul(np.multiply(np.sqrt(val_trunc)[:, None], eig_funcs_hyp[:, None]).T, np.multiply(np.sqrt(val_trunc)[:, None], eig_funcs_hyp[:, None])))))
-	# 	C = np.multiply(sigma_3, np.matmul(np.multiply(np.sqrt(val_trunc)[:, None], (phi_x_dx)[:, None]), np.multiply(np.sqrt(val_trunc)[:, None], (phi_x_dx)[:, None]).T))
-	# 	sigma_2 = np.sum(C)
-	# 	mu_3 = np.matmul(sigma_3, np.multiply(np.sqrt(val_trunc)[:, None], eig_funcs_hyp[:, None]))
-	# 	mat_coef = np.multiply(np.matmul(sigma_3, np.multiply(np.sqrt(val_trunc)[:, None], eig_funcs_hyp[:, None])), np.multiply(np.sqrt(val_trunc)[:, None], phi_x_dx[:, None]))
-	# 	mat_coef_sq = np.matmul(mat_coef, mat_coef.T)
-	# 	mu1_mu2_sq_int = np.sum(mat_coef_sq)
-	# 	return mu1_mu2_sq_int, sigma_2
-
 	def get_params_2(self, model, X, Y, x_hyp):
 		ells = model.kern.lengthscale
 		ss = model.kern.variance
@@ -413,15 +396,7 @@ class KLSampler(object):
 		v_x_hyp =  xi_x_hyp - np.matmul(np.matmul(ek.T, model.posterior.woodbury_inv), k_X_x_hyp) 
 		sigma_2 = sigma_1 - (v_x_hyp ** 2) / k_x_x_hyp
 		mu1_mu2_sq_int = (v_x_hyp) ** 2
-		# print mu1_mu2_sq_int, sigma_2
 		return mu1_mu2_sq_int.item(), sigma_2.item() # All scalars now
-
-	# def get_sigma_1_sa(self, val_trunc, phi_x_dx):
-	# 	"""
-	# 	Returns the variance of the posterior using the KLE. semi-analytic.
-	# 	"""
-	# 	sigma_1 = np.sum((np.multiply(np.sqrt(val_trunc)[:, None], phi_x_dx[:, None])) ** 2)
-	# 	return sigma_1
 
 	def get_sigma_1(self, model, X, Y):
 		ells = model.kern.lengthscale
@@ -451,10 +426,6 @@ class KLSampler(object):
 		eig_funcs_hyp = np.zeros(len(val_trunc))
 		k_x_d_x = (model.predict(np.vstack([x_d, np.atleast_2d(x_hyp)]), full_cov=True, include_likelihood=False)[1][-1, :-1])[:, None]
 		eig_funcs_hyp = np.sum(np.multiply(vec_trunc, np.multiply((w_j[w_j>0])[:, None], k_x_d_x)), axis=0) / val_trunc
-		# print eig_funcs_hyp
-		# for i in xrange(len(val_trunc)):
-		# 	eig_funcs_hyp[i, ] = self.eig_func(x_hyp, (w_j[w_j>0])[:, None], x_d, val_trunc[i, ], (vec_trunc[:, i])[:, None] )
-		# print eig_funcs_hyp
 		return eig_funcs_hyp
 
 	def get_mu_sigma(self, model, X, Y):
@@ -514,12 +485,6 @@ class KLSampler(object):
 		kld_j = np.ndarray((params.shape[0], 1))
 		for i in xrange(params.shape[0]):
 			mcmc_model = self.make_mcmc_model(params[i, :], self.X, self.Y)
-			# val_trunc, vec_trunc, w_j, x_d, phi_x_dx = self.eig_val_vec(model=mcmc_model)
-			# eig_funcs_hyp = self.get_eig_funcs_hyp(x_hyp, w_j, x_d, val_trunc, vec_trunc, model=mcmc_model)
-			# sigma_1 = self.get_sigma_1_sa(val_trunc, phi_x_dx)
-			# print sigma_1, 'sigma_1_sa'
-			# mu1_mu2_sq_int, sigma_2 = self.get_params_2_sa(val_trunc, eig_funcs_hyp, phi_x_dx, model=mcmc_model)
-			# print sigma_2, 'sigma_2_sa'
 			kld_j[i] =  self.avg_kld_mean(x_hyp, self.X, self.Y, model=mcmc_model) 
 		return np.mean(np.log(kld_j)), np.var(np.log(kld_j))
 
@@ -591,20 +556,6 @@ class KLSampler(object):
 		else:
 			idx = np.argsort(X_design[:, ], axis=0)[:, 0]
 			ax2.plot(X_design[idx[:]], kld[idx[:]], linestyle='-.', linewidth=3.0, c=sns.color_palette()[2], label='EKLD')
-		# ax1.scatter(x_grid[np.argmax(pred_var_kl), 0], self.obj_func(x_grid[np.argmax(pred_var_kl)]), s=50, marker='o', c='yellow') # maximum variance point
-		# ax2.plot(x_grid[:, 0], pred_var_kl/max(pred_var_kl)/1., c=sns.color_palette()[2], label='current uncertainty')
-		# Plotting uncertainty sampling status
-		# pred_var = np.array([self.model_d[0].predict(np.atleast_2d(x))[1][0, 0] for x in x_grid])
-		# ax2.plot(x_grid[:, 0], pred_var/max(pred_var)/1., '--', c=sns.color_palette()[4], label='uncertainty sampling (US)')
-		# y_d_pos = self.model_d[0].posterior_samples_f(x_grid, 1000, full_cov=True)
-		# y_d_m = np.percentile(y_d_pos, 50, axis=1)
-		# ax1.plot(x_grid, y_d_m, '-', c=sns.color_palette()[4], label='posterior mean US')
-		# idx_us = np.argmax(pred_var)
-		# ax1.scatter(x_grid[np.argmax(pred_var), 0], self.obj_func(x_grid[np.argmax(pred_var)]), marker='o', c='blue', label='US sample')
-		# This is an ad hoc step here , not yet final if we need this.
-		# if it==self.max_it - 1:
-		# 	ax1.scatter(self.X_u, self.Y_u, marker='o', c='blue', label='US samples')
-		# ax1.plot(self.quad_points, self.quad_points_weight, '--', c='black', label='weights')
 		if it==self.max_it-1:
 			ax1.scatter(x_best, y_obs, marker='X', s=80, c='black', zorder=10)
 			dat = ax1.scatter(self.X[:, 0], self.Y[:, 0], marker='X', s=80, c='black', label='observed data', zorder=10)
@@ -704,7 +655,6 @@ class KLSampler(object):
 				idx_best = np.argmax(ekld_mu)
 				x_best = ego_lhs[idx_best, ]
 				kld = np.exp(mu_ekld[:, 0]) 	# Applying the transformation here
-				# rel_kld[i, ] = max(np.exp(mu_ekld))
 				rel_kld[i, ] = max(np.exp(mu_ekld))
 				kld_all [i, :] = np.exp(mu_ekld[:, 0])
 				if verbose>0:
