@@ -11,6 +11,7 @@ It needs the support of the following PYTHON packages.
 3. matplotlib(version 2.0.0, best vizualization)
 4. seaborn (version 0.7.1, best vizualization)
 5. tqdm
+6. emcee
 
 To install the package do the following:
 pip install git+git://github.com/piyushpandita92/bode.git  
@@ -34,3 +35,4 @@ Running the code: the examples in the ```tests``` directory can be called from t
 After each iteration a plot depicting the state of the function is generated for 1d problems, this can be controlled by a ```plots``` flag set to 0 or 1.  
 
 More documentation to follow.
+If you have any questions about pydes, contact me at piyush100078@gmail.com .
