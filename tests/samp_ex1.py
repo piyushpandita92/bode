@@ -16,8 +16,8 @@ import GPy
 import time
 import itertools
 import pickle
-from sampler import *
-from cycler import cycler
+from bode._sampler import *
+# from cycler import cycler
 from scipy.stats import truncnorm
 from scipy.stats import norm
 from scipy.stats import uniform
@@ -52,10 +52,10 @@ if __name__=='__main__':
 	Y_init = np.array([objective(x) for x in X_init])[:, None]
 	X_true = lhs(dim, samples=n_true, criterion='center')
 	Y_true = np.array([objective(x) for x in X_true])[:, None]
-	true_mean = np.mean(Y_true)	
-	print true_mean
+	true_mean = np.mean(Y_true)
+	print(true_mean)
 	quit()
-	print 'true E[f(x)]: ', true_mean
+	print('true E[f(x)]: ', true_mean)
 	num_quad_points = 500
 	# quad_points = np.linspace(0, 1, num_quad_points)[:, None]
 	quad_points = lhs(dim, num_quad_points)
@@ -77,10 +77,10 @@ if __name__=='__main__':
 	# quad_points_weight = 1./np.sqrt(abs(quad_points-0.5)) 		 	# Middle heavy
 	idx_quad = np.argsort(quad_points, axis=0)
 	x_hyp = np.array([[.6]])
-	kls = KLSampler(X_init, Y_init, x_hyp=False, 
-		model_kern=GPy.kern.RBF, 
-		bounds=[(0,1)] * X_init.shape[1], 
-		obj_func=objective, 
+	kls = KLSampler(X_init, Y_init, x_hyp=False,
+		model_kern=GPy.kern.RBF,
+		bounds=[(0,1)] * X_init.shape[1],
+		obj_func=objective,
 		true_func=objective_true,
 		noisy=False,
 		nugget=1e-3,
@@ -116,7 +116,7 @@ if __name__=='__main__':
 	with open(os.path.join(out_dir, "comp.pkl"), "wb") as f:
 		pickle.dump(comp_log, f)
 	kld_max = np.ndarray(kld.shape[0])
-	for i in xrange(kld.shape[0]):
+	for i in range(kld.shape[0]):
 		kld_max[i] = max(kld[i, :])
 	plt.plot(np.arange(len(kld_max)), kld_max / max(kld_max), color=sns.color_palette()[1])
 	plt.xlabel('iterations', fontsize=16)
@@ -131,7 +131,7 @@ if __name__=='__main__':
 	x_rs = np.ndarray((size, len(mu_qoi)))
 	pos = np.arange(n, n + len(mu_qoi))
 	plt.plot(pos, true_mean * np.ones(len(pos)), '--', label='true value of the $Q$', linewidth=4)
-	for i in xrange(len(mu_qoi)):
+	for i in range(len(mu_qoi)):
 		x[:, i] = norm.rvs(loc=mu_qoi[i], scale=sigma_qoi[i] ** .5, size=size)
 		x_us[:, i] = norm.rvs(loc=comp_log[0][i], scale=comp_log[1][i] ** .5, size=size)
 	bp_ekld = plt.boxplot(x, positions=np.arange(n, n + len(mu_qoi)), conf_intervals=np.array([[2.5, 97.5]] * x.shape[1]))

@@ -55,7 +55,7 @@ if __name__=='__main__':
 	X_true = lhs(dim, samples=n_true, criterion='center')
 	Y_true = np.array([objective(x) for x in X_true])[:, None]
 	true_mean = np.mean(Y_true)
-	print 'true E[f(x)]: ', true_mean
+	print('true E[f(x)]: ', true_mean)
 	num_it = 15
 	X_init = lhs(dim, samples=n, criterion='center')
 	Y_init = np.array([objective(x) for x in X_init])[:, None]
@@ -118,7 +118,7 @@ if __name__=='__main__':
 		pickle.dump(comp_log, f)
 	kld_max = np.ndarray(kld.shape[0])
 	err = np.zeros(num_it + 1) # Error in the QoI being estimated after each iteration
-	for i in xrange(kld.shape[0]):
+	for i in range(kld.shape[0]):
 		kld_max[i] = max(kld[i, :])
 	plt.plot(np.arange(len(kld_max)), kld_max/max(kld_max), color=sns.color_palette()[1])
 	plt.xlabel('iterations', fontsize=16)
@@ -130,7 +130,7 @@ if __name__=='__main__':
 	size = 10000
 	x = np.ndarray((size, len(mu_qoi)))
 	x_us = np.ndarray((size, len(mu_qoi)))
-	for i in xrange(len(mu_qoi)):
+	for i in range(len(mu_qoi)):
 		x[:, i] = norm.rvs(loc=mu_qoi[i], scale=sigma_qoi[i] ** .5, size=size)
 		x_us[:, i] = norm.rvs(loc=comp_log[0][i], scale=comp_log[1][i] ** .5, size=size)
 	bp_ekld = plt.boxplot(x, positions=np.arange(n, n + len(mu_qoi)), conf_intervals=np.array([[2.5, 97.5]] * x.shape[1]))

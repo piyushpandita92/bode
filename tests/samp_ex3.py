@@ -75,9 +75,9 @@ if __name__=='__main__':
     kld_max = np.ndarray(kld.shape[0])
     err = np.zeros(num_it + 1) # Error in the QoI being estimated after each iteration
     true_mean = 1.
-    for i in xrange(Y.shape[0]-n):
+    for i in range(Y.shape[0]-n):
         err[i] = (abs(np.mean(Y[:n+i, :]) - true_mean)/abs(true_mean))*100
-    for i in xrange(kld.shape[0]):
+    for i in range(kld.shape[0]):
         kld_max[i] = max(kld[i, :])
     plt.plot(np.arange(len(kld_max)), kld_max/max(kld_max), color=sns.color_palette()[1])
     plt.xlabel('iterations')

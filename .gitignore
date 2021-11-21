@@ -1,0 +1,13 @@
+## macOS
+.DS_Store
+
+## Python
+__pycache__/
+*.py[cod]
+
+## 2to3 conversion
+*.bak
+
+## venvs
+*.egg-info/
+
