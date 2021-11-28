@@ -16,8 +16,8 @@ import GPy
 import time
 import pickle
 import itertools
-from sampler import *
-from cycler import cycler
+from bode import *
+# from cycler import cycler
 from scipy.stats import norm
 from scipy.stats import uniform
 from scipy.stats import beta
@@ -78,10 +78,10 @@ if __name__=='__main__':
 	# quad_points_weight = 1./ np.sqrt(quad_points[:,0])			   # Left side heavy
 	# quad_points_weight = 1./np.sqrt(abs(quad_points-0.5)) 		 	# Middle heavy
 	quad_points_weight = np.ones(num_quad_points)
-	kls = KLSampler(X_init, Y_init, x_hyp, 
-		model_kern=GPy.kern.RBF, 
-		bounds=[(0, 1)] * X_init.shape[1], 
-		obj_func=objective, 
+	kls = KLSampler(X_init, Y_init, x_hyp,
+		model_kern=GPy.kern.RBF,
+		bounds=[(0, 1)] * X_init.shape[1],
+		obj_func=objective,
 		true_func=objective_true,
 		noisy=False,
 		energy=0.95,
@@ -99,7 +99,7 @@ if __name__=='__main__':
 		mcmc_chains=8,
 		mcmc_steps=5000,
 		mcmc_burn=100,
-		mcmc_model_avg=80, 
+		mcmc_model_avg=80,
 		mcmc_thin=20,
 		ego_iter=20,
 		mcmc_parallel=8,

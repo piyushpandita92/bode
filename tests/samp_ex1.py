@@ -16,7 +16,7 @@ import GPy
 import time
 import itertools
 import pickle
-from bode._sampler import *
+from bode import *
 # from cycler import cycler
 from scipy.stats import truncnorm
 from scipy.stats import norm
@@ -54,7 +54,7 @@ if __name__=='__main__':
 	Y_true = np.array([objective(x) for x in X_true])[:, None]
 	true_mean = np.mean(Y_true)
 	print(true_mean)
-	quit()
+	# quit()
 	print('true E[f(x)]: ', true_mean)
 	num_quad_points = 500
 	# quad_points = np.linspace(0, 1, num_quad_points)[:, None]
@@ -73,8 +73,8 @@ if __name__=='__main__':
 	# quad_points_weight = norm.pdf(quad_points, mu, sigma)
 	# quad_points = np.linspace(0.01, .99, num_quad_points)[:, None] 			# Linearly space points
 	# quad_points_weight = 1. / np.sqrt(1. - (quad_points[:, 0] ** 2)) 	# Right side heavy
-	# quad_points_weight = 1./ np.sqrt(quad_points[:, 0])			   		# Left side heavy
-	# quad_points_weight = 1./np.sqrt(abs(quad_points-0.5)) 		 	# Middle heavy
+	# quad_points_weight = 1./ np.sqrt(quad_points[:, 0])  # Left side heavy
+	# quad_points_weight = 1./np.sqrt(abs(quad_points-0.5)) # Middle heavy
 	idx_quad = np.argsort(quad_points, axis=0)
 	x_hyp = np.array([[.6]])
 	kls = KLSampler(X_init, Y_init, x_hyp=False,
