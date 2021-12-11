@@ -266,6 +266,7 @@ class KLSampler(object):
 					else:
 						# pdb.set_trace()
 						init_pos = [last_model[0][(i + 1) * (self.mcmc_model_avg // self.mcmc_chains) - 1, :] for i in range(self.mcmc_chains)]
+				
 				sampler = emcee.EnsembleSampler(nchains, ndim, self.lnprob, args=(model, X, Y))
 				sampler.run_mcmc(init_pos, self.mcmc_steps)
 				print('>... acceptance ratio(s):', sampler.acceptance_fraction)
