@@ -1,12 +1,15 @@
 """
-Re-implementation of Example1 of BODE for understanding
+Re-implementation of BODE for understanding
+
 Author:
     Murali Krishnan Rajasekharan Pillai
 
 Date:
-    11/26/2021
+    12/11/2021
 """
 
+import os
+import shutil
 import numpy as np
 import pyDOE
 import matplotlib as mpl
@@ -16,11 +19,14 @@ sns.set_style('white')
 sns.set_context('paper')
 plt.rcParams['agg.path.chunksize'] = 1000
 
+from bode import KLSampler
+
 class Ex1Func():
     """
     Example 1 :
     """
     def __init__(self, sigma=lambda x: 0.5):
+        assert callable(sigma)
         self.sigma = sigma
 
     def __call__(self, x):
@@ -46,15 +52,22 @@ if __name__ == '__main__':
     X_true = pyDOE.lhs(dim, samples=n_true, criterion='center')
     X_idx = np.argsort(X_true, axis=0)
     Y_true = objective(X_true)
-    print(idx)
-    print(Y_true[idx].reshape(-1,1))
     true_mean = Y_true.mean()
     print(r'true E[f(x)]: ', true_mean)
-    # fig, ax = plt.subplots(figsize=(12, 9))
-    # ax.plot(X_init, Y_init, 'x', label='Init')
-    # ax.plot(X_true[X_idx].reshape(-1,1), Y_true[X_idx].reshape(-1,1), label='True')
-    # plt.show()
-    # plt.tight_layout()
 
     num_quad_points = 500
     quad_points = pyDOE.lhs(dim, num_quad_points)
+    quad_points_weight = np.ones(num_quad_points)
+
+    mu, sigma, num_it = 0.5, 0.2, 1
+    outdir = 'mcmc_ex1_n={0:d}_it={1:d}'.format(n, num_it)
+    if os.path.isdir(outdir):
+        shutil.rmtree(outdir)
+    os.makedirs(outdir)
+
+    idx_quad = np.argsort(quad_points, axis=0)
+    x_hyp = np.array([[0.6]])
+
+    kls = KLSampler(X_init, Y_init,
+        obj_func=objective,
+        noisy=False)
