@@ -8,13 +8,14 @@ from scipy.optimize import minimize
 import math
 import GPy
 from pyDOE import *
-from _core import *
+from ._core import *
 import itertools
 import time
 from copy import copy
 from scipy.stats import multivariate_normal
 from scipy.stats import norm
 import emcee
+import pdb
 start_time = time.time()
 
 __all__ = ['KLSampler']
@@ -22,7 +23,7 @@ __all__ = ['KLSampler']
 class KLSampler(object):
 	"""
 	This class computes the sensitivity of a set of inputs
-	by taking the posterior expectation of the var of the 
+	by taking the posterior expectation of the var of the
 	corresponding effect functions.
 	"""
 
@@ -38,7 +39,7 @@ class KLSampler(object):
 		This returns the estimated noise for the GP model.
 		"""
 		return self._noise
-	
+
 
 	def _ss(self):
 		ss = (np.array([self.model[0].param_array[0]]))
@@ -52,7 +53,7 @@ class KLSampler(object):
 		"""
 		return self._ss
 
-	
+
 	def _lengthscales(self):
 		ells = np.array([self.model[0].param_array[i] for i in range(1, self.X.shape[1]+1)])
 		return ells
@@ -65,12 +66,12 @@ class KLSampler(object):
 		"""
 		return self._lengthscales
 
-	
+
 	def w_mat(self, noise=None):
 		n = self.X.shape[0]
 		if noise is not None:
 			l = np.linalg.cholesky(self.kern_mat(self.X, self.X) + noise * np.eye(n))
-			
+
 		else:
 			l = np.linalg.cholesky(self.kern_mat(self.X, self.X) + self.noise() * np.eye(n))
 		w = np.matmul(np.linalg.inv(l).T, np.linalg.inv(l))
@@ -87,11 +88,11 @@ class KLSampler(object):
 			W = self.w_mat(noise=noise)
 		alpha = np.matmul(W, self.Y)
 		return alpha
-	
+
 
 	def __init__(self, X, Y, x_hyp, obj_func, noisy, bounds,
 		true_func=None,
-		model_kern=GPy.kern.Matern32, 
+		model_kern=GPy.kern.Matern32,
 		num_opt_restarts=80,
 		num_mc_samples=1000,
 		num_quad_points=100,
@@ -99,7 +100,7 @@ class KLSampler(object):
 		nugget=1e-3,
 		lengthscale=1.,
 		variance=1.,
-		N_avg=1000, 
+		N_avg=1000,
 		kld_tol=1e-2,
 		func_name='ex1',
 		quad_points=None,
@@ -127,7 +128,7 @@ class KLSampler(object):
 		"""
 		:param X:		the inputs of the training data as an array.
 		:param Y:		the outputs of the training data as an array.
-		:param idx: 	set of indicies for which the 
+		:param idx: 	set of indicies for which the
 						effect function is needed.
 		:param all:		if all lower level indicies are needed as well.
 		"""
@@ -189,9 +190,9 @@ class KLSampler(object):
 		self.N_avg = N_avg
 		self.bounds = bounds
 		self.kld_tol = kld_tol
-		self.func_name = func_name
+		self.__name__ = func_name
 		self.max_it = max_it
-		
+
 
 	def kern_mat(self, xi, xj):
 		"""
@@ -209,7 +210,7 @@ class KLSampler(object):
 		"""
 		var_log_prior = self.variance_prior(param[0])
 		ell_log_prior = 0
-		for j in xrange(self.X.shape[1]):
+		for j in range(self.X.shape[1]):
 			ell_log_prior += self.lengthscale_prior(param[j+1])
 		if self.noisy:
 			noise_log_prior = self.noise_prior(param[-1])
@@ -243,32 +244,34 @@ class KLSampler(object):
 		"""
 		m = Y.shape[1]
 		surrogates = []
-		for i in xrange(m):
+		for i in range(m):
 			if mcmc:
 				model = GPy.models.GPRegression(X, Y, self.model_kern(input_dim=X.shape[1], ARD=True))
 				if self.noisy:
 					ndim, nchains = X.shape[1] + 2, self.mcmc_chains
 					if it==0:
 						if self.initialize_from_prior:
-							init_pos = [np.hstack([self.variance_prior.sample(size=1), self.lengthscale_prior.sample(size=X.shape[1]), self.noise_prior.sample(size=1)]) for j in xrange(nchains)]
+							init_pos = [np.hstack([self.variance_prior.sample(size=1), self.lengthscale_prior.sample(size=X.shape[1]), self.noise_prior.sample(size=1)]) for j in range(nchains)]
 						else:
-							init_pos = [np.hstack([self.variance * np.random.rand(1), self.lengthscale * np.random.rand(X.shape[1]), self.nugget * np.random.rand(1)]) for j in xrange(nchains)]
+							init_pos = [np.hstack([self.variance * np.random.rand(1), self.lengthscale * np.random.rand(X.shape[1]), self.nugget * np.random.rand(1)]) for j in range(nchains)]
 					else:
-						init_pos = [last_model[0][(i + 1) * (self.mcmc_model_avg / self.mcmc_chains) - 1, :] for i in xrange(self.mcmc_chains)]
+						init_pos = [last_model[0][(i + 1) * (self.mcmc_model_avg // self.mcmc_chains) - 1, :] for i in range(self.mcmc_chains)]
 				else:
 					ndim, nchains = X.shape[1] + 1, self.mcmc_chains
 					if it==0:
 						if self.initialize_from_prior:
-							init_pos = [np.hstack([self.variance_prior.sample(size=1), self.lengthscale_prior.sample(size=X.shape[1])]) for j in xrange(nchains)]
+							init_pos = [np.hstack([self.variance_prior.sample(size=1), self.lengthscale_prior.sample(size=X.shape[1])]) for j in range(nchains)]
 						else:
-							init_pos = [np.hstack([self.variance * np.random.rand(1), self.lengthscale * np.random.rand(X.shape[1]), self.nugget * np.random.rand(1)]) for j in xrange(nchains)]
+							init_pos = [np.hstack([self.variance * np.random.rand(1), self.lengthscale * np.random.rand(X.shape[1]), self.nugget * np.random.rand(1)]) for j in range(nchains)]
 					else:
-						init_pos = [last_model[0][(i + 1) * (self.mcmc_model_avg / self.mcmc_chains) - 1, :] for i in xrange(self.mcmc_chains)]	
+						# pdb.set_trace()
+						init_pos = [last_model[0][(i + 1) * (self.mcmc_model_avg // self.mcmc_chains) - 1, :] for i in range(self.mcmc_chains)]
+
 				sampler = emcee.EnsembleSampler(nchains, ndim, self.lnprob, args=(model, X, Y))
 				sampler.run_mcmc(init_pos, self.mcmc_steps)
-				print '>... acceptance ratio(s):', sampler.acceptance_fraction
+				print('>... acceptance ratio(s):', sampler.acceptance_fraction)
 				samples_thin = sampler.chain[:, self.mcmc_burn:self.mcmc_steps:self.mcmc_thin, :]
-				surrogates.append(samples_thin[:, -int(self.mcmc_model_avg / self.mcmc_chains):, :].reshape((-1, ndim)))
+				surrogates.append(samples_thin[:, - int(self.mcmc_model_avg / self.mcmc_chains):, :].reshape((-1, ndim)))
 				return surrogates
 			else:
 				# try:
@@ -312,7 +315,7 @@ class KLSampler(object):
 		idx_dim = min(np.where(tot_val >= self.energy)[0])
 		val_trunc = val_sort[:idx_dim + 1, ]
 		vec_trunc = vec_sort[:, :idx_dim + 1]
-		phi_x_dx = np.array([np.mean(np.sum(np.multiply(np.multiply(vec_trunc[:, j][:, None], (np.sqrt(((p_x_d / np.sum(self.quad_points_weight)))))[:, None]), K_x_d), axis=0), axis=0) for j in xrange(vec_trunc.shape[1])]) / val_trunc
+		phi_x_dx = np.array([np.mean(np.sum(np.multiply(np.multiply(vec_trunc[:, j][:, None], (np.sqrt(((p_x_d / np.sum(self.quad_points_weight)))))[:, None]), K_x_d), axis=0), axis=0) for j in range(vec_trunc.shape[1])]) / val_trunc
 		# phi_x_dx = np.mean(np.multiply(vec_trunc, (np.sqrt(((p_x_d / np.sum(self.quad_points_weight)))))[:, None]), axis=0)
 		# phi_x_dx = self.get_phi_x_dx(val_trunc, vec_trunc, W_h, x_d, p_x_d)
 		return val_trunc, vec_trunc, W_h, x_d, phi_x_dx
@@ -320,19 +323,19 @@ class KLSampler(object):
 
 	def sample_xi_hyp(self, dim, val_trunc, eig_funcs, m_x, y_hyp, model):
 		"""
-		Samples a multivariate random variable conditioned on the data and a 
+		Samples a multivariate random variable conditioned on the data and a
 		hypothetical observation.
-		:param m_x:			keep in mind this is the posterior mean conditional 
+		:param m_x:			keep in mind this is the posterior mean conditional
 							on data and a hypothetical observation.
 		:param dim:			number of reduced dimensions of the eigenvalues.
 		:param val_trunc:	eigenvalues after truncation.
 		:param eig_funcs:	eigenvectors after truncation.
-		:param y:			hypothetical sampled observation.	
+		:param y:			hypothetical sampled observation.
 		"""
 		sigma_inv = np.multiply(np.matmul(np.sqrt(val_trunc)[:, None], np.sqrt(val_trunc)[None, :]), np.matmul(eig_funcs[:, None], eig_funcs[None, :]))
 		sigma_inv_2 = sigma_inv / (model[0].likelihood.variance)
 		sigma_inv_1 = np.eye(dim)
-		sigma_3 = np.linalg.inv(sigma_inv_1 + sigma_inv_2) 
+		sigma_3 = np.linalg.inv(sigma_inv_1 + sigma_inv_2)
 		mu_3 = ((y_hyp - m_x)/ (model.likelihood.variance)) * np.matmul(sigma_3, np.multiply(np.sqrt(val_trunc)[:, None], eig_funcs[:, None]))
 		xi = np.random.multivariate_normal(mu_3[:, 0], sigma_3, 1).T
 		return xi
@@ -358,9 +361,9 @@ class KLSampler(object):
 		sample_xi  = self.sample_xi(val_trunc.shape[0])
 		eig_funcs_f = np.zeros((len(x_grid), len(val_trunc)))
 		clock_time = time.time()
-		for j in xrange(len(x_grid)):
+		for j in range(len(x_grid)):
 			x = x_grid[j]
-			for i in xrange(eig_funcs_f.shape[1]):
+			for i in range(eig_funcs_f.shape[1]):
 				eig_funcs_f[j, i] = self.eig_func(x, (w_j[w_j>0])[:, None], x_d, val_trunc[i, ], (vec_trunc[:, i])[:, None])
 			#print '>... Sampled the eigenfunction at', time.time() - clock_time, 'seconds'
 			samp[j, ] =  self.model[0].predict(np.atleast_2d(x), include_likelihood=False)[0][0] + np.sum(np.multiply(np.multiply(sample_xi, (np.sqrt(val_trunc))[:, None]), eig_funcs_f[j, :][:, None])).copy()
@@ -375,12 +378,12 @@ class KLSampler(object):
 		val_trunc, vec_trunc, w_j, x_d, phi_x_dx = self.get_val_vec
 		eig_funcs_hyp = np.zeros(len(val_trunc))
 		eig_funcs_f_hyp = np.zeros((len(x_grid), len(val_trunc)))
-		for i in xrange(len(val_trunc)):
+		for i in range(len(val_trunc)):
 			eig_funcs_hyp[i, ] = self.eig_func(x_hyp, (w_j[w_j>0])[:, None], x_d, val_trunc[i, ], (vec_trunc[:, i])[:, None] )
 		sample_xi_hyp = self.sample_xi_hyp(val_trunc.shape[0], val_trunc, eig_funcs_hyp, m_x_hyp, y_hyp, self.model)
-		for j in xrange(len(x_grid)):
+		for j in range(len(x_grid)):
 			x = x_grid[j]
-			for i in xrange(eig_funcs_f_hyp.shape[1]):
+			for i in range(eig_funcs_f_hyp.shape[1]):
 				eig_funcs_f_hyp[j, i] = self.eig_func(x, (w_j[w_j>0])[:, None], x_d, val_trunc[i, ], (vec_trunc[:, i])[:, None])
 			samp_hyp[j, ] = self.model[0].predict(np.atleast_2d(x), include_likelihood=False)[0][0] + np.sum(np.multiply(np.multiply(sample_xi_hyp, (np.sqrt(val_trunc))[:, None]), (eig_funcs_f_hyp[j, :])[:, None]))
 		return samp_hyp, y_hyp, val_trunc, eig_funcs_f_hyp
@@ -393,7 +396,7 @@ class KLSampler(object):
 		k_X_x_hyp = model.kern.K(X, np.atleast_2d(x_hyp))
 		k_x_x_hyp = model.predict(np.atleast_2d(x_hyp), full_cov=False, include_likelihood=True)[1]
 		xi_x_hyp = xik(np.atleast_2d(x_hyp), ells, ss)
-		v_x_hyp =  xi_x_hyp - np.matmul(np.matmul(ek.T, model.posterior.woodbury_inv), k_X_x_hyp) 
+		v_x_hyp =  xi_x_hyp - np.matmul(np.matmul(ek.T, model.posterior.woodbury_inv), k_X_x_hyp)
 		sigma_2 = sigma_1 - (v_x_hyp ** 2) / k_x_x_hyp
 		mu1_mu2_sq_int = (v_x_hyp) ** 2
 		return mu1_mu2_sq_int.item(), sigma_2.item() # All scalars now
@@ -433,7 +436,7 @@ class KLSampler(object):
 			mu_1 = 0
 			sigma_1 = 0
 			params = self.model[0]
-			for k in xrange(params.shape[0]):
+			for k in range(params.shape[0]):
 				mcmc_model = self.make_mcmc_model(params[k, :], X, Y)
 				val_trunc, vec_trunc, W_h, x_d, phi_x_dx = self.eig_val_vec(model=mcmc_model)
 				mu_1 += self.get_mu_1(mcmc_model, X, Y)
@@ -450,7 +453,7 @@ class KLSampler(object):
 		model = GPy.models.GPRegression(X, Y, self.model_kern(input_dim=X.shape[1], ARD=True))
 		if self.noisy:
 			model.kern.variance.fix(param[0])
-			model.kern.lengthscale.fix(param[1: -1]) 
+			model.kern.lengthscale.fix(param[1: -1])
 			model.likelihood.variance.fix(param[-1] ** 2)
 		else:
 			model.kern.variance.fix(param[0])
@@ -461,10 +464,10 @@ class KLSampler(object):
 	def avg_kld_mean(self, x_hyp, X, Y, model=None):
 		"""
 		Take samples from the posterior for a hypothetical point and
-		compute the average Kullbeck Liebler (KL) Divergence from the 
-		augmented posterior to the current posterior.	
+		compute the average Kullbeck Liebler (KL) Divergence from the
+		augmented posterior to the current posterior.
 		For the mean of a black box function as the quantity of interest,
-		the above distributions are Gaussian with known means and 
+		the above distributions are Gaussian with known means and
 		computed variances.
 		"""
 		# These remain constant for a single optimization iteration
@@ -483,9 +486,9 @@ class KLSampler(object):
 		"""
 		params = model[0]
 		kld_j = np.ndarray((params.shape[0], 1))
-		for i in xrange(params.shape[0]):
+		for i in range(params.shape[0]):
 			mcmc_model = self.make_mcmc_model(params[i, :], self.X, self.Y)
-			kld_j[i] =  self.avg_kld_mean(x_hyp, self.X, self.Y, model=mcmc_model) 
+			kld_j[i] =  self.avg_kld_mean(x_hyp, self.X, self.Y, model=mcmc_model)
 		return np.mean(np.log(kld_j)), np.var(np.log(kld_j))
 
 	def update_XY(self, x_best, y_obs):
@@ -504,7 +507,7 @@ class KLSampler(object):
 		if self.mcmc_model:
 			params = self.model_d[0]
 			pred_var = np.ndarray((x_grid.shape[0], params.shape[0]))
-			for i in xrange(params.shape[0]):
+			for i in range(params.shape[0]):
 				mcmc_model_d = self.make_mcmc_model(params[i, :], self.X_u, self.Y_u)
 				pred_var[:, i] = np.array([mcmc_model_d.predict(np.atleast_2d(x), include_likelihood=False)[1][0, 0] for x in x_grid])
 			pred_var = pred_var.mean(axis=1)
@@ -529,17 +532,18 @@ class KLSampler(object):
 		idx = np.argsort(X_design[:, ], axis=0)[:, 0]
 		x_grid = X_design[idx[:]]
 		if self.true_func:
-			y_grid = np.array([self.true_func(x_grid[i]) for i in xrange(x_grid.shape[0])])
+			y_grid = np.array([self.true_func(x_grid[i]) for i in range(x_grid.shape[0])])
 			true = ax1.plot(x_grid, y_grid, '-' , c=sns.color_palette()[0], linewidth=4.0, label='true function')
 		if self.mcmc_model:
 			params = model[0]
 			mcmc_model = self.make_mcmc_model(params[0, :], self.X, self.Y)
-			y_pos = mcmc_model.posterior_samples_f(x_grid, 500, full_cov=True)
+			y_pos = mcmc_model.posterior_samples_f(x_grid, 500, full_cov=True)[:,0,:]
 			for i in range(1, params.shape[0]):
 				mcmc_model = self.make_mcmc_model(params[i, :], self.X, self.Y)
-				y_pos = np.hstack([y_pos, mcmc_model.posterior_samples_f(x_grid, 500, full_cov=True)])
+				y_pos = np.hstack([y_pos, mcmc_model.posterior_samples_f(x_grid, 500, full_cov=True)[:,0,:]])
 		else:
-			y_pos = model.posterior_samples_f(x_grid, 1000, full_cov=True)
+			y_pos = model.posterior_samples_f(x_grid, 1000, full_cov=True)[:,0,:]
+		# pdb.set_trace()
 		y_m = np.percentile(y_pos, 50, axis=1)
 		y_l = np.percentile(y_pos, 2.5, axis=1)
 		y_u = np.percentile(y_pos, 97.5, axis=1)
@@ -547,7 +551,7 @@ class KLSampler(object):
 		ax1.fill_between(x_grid[:, 0], y_l, y_u, color=sns.color_palette()[1], alpha=0.25, zorder=3)
 		if self.mcmc_model:
 			idx = np.argsort(X_design[:, ], axis=0)[:, 0]
-			y_ekld_pos = np.exp(ekld_model[0].posterior_samples_f(X_design, 1000, full_cov=True))
+			y_ekld_pos = np.exp(ekld_model[0].posterior_samples_f(X_design, 1000, full_cov=True)[:,0,:])
 			y_ekld_m = np.percentile(y_ekld_pos, 50, axis=1)
 			y_ekld_l = np.percentile(y_ekld_pos, 2.5, axis=1)
 			y_ekld_u = np.percentile(y_ekld_pos, 97.5, axis=1)
@@ -566,7 +570,7 @@ class KLSampler(object):
 			# Now we make the plots for US
 			params = self.model_d[0]
 			pred_var = np.ndarray((x_grid.shape[0], params.shape[0]))
-			for i in xrange(params.shape[0]):
+			for i in range(params.shape[0]):
 				mcmc_model = self.make_mcmc_model(params[i, :], self.X_u, self.Y_u)
 				pred_var[:, i] = np.array([mcmc_model.predict(np.atleast_2d(x), include_likelihood=False)[1][0, 0] for x in x_grid])
 			pred_var = pred_var.mean(axis=1)
@@ -587,7 +591,7 @@ class KLSampler(object):
 		ax2.tick_params(axis='y', colors=sns.color_palette()[2])
 		ax1.set_ylabel('$f(x)$', fontsize=16)
 		ax1.set_xlim(self.bounds[0])
-		plt.savefig(self.func_name + '_kld_' + str(it+1).zfill(len(str(self.max_it))) +'.png', dpi=(900), figsize=(3.25, 3.25))
+		plt.savefig(self.__name__ + '_kld_' + str(it+1).zfill(len(str(self.max_it))) +'.png', dpi=(900), figsize=(3.25, 3.25))
 		plt.clf()
 
 
@@ -604,8 +608,8 @@ class KLSampler(object):
 			mu_us = []
 			sigma_us = []
 			models_us = []
-		for i in xrange(self.max_it):
-			print 'iteration no. ', i + 1
+		for i in range(self.max_it):
+			print('iteration no. ', i + 1)
 			X_design = lhs(self.X.shape[1], num_designs, criterion='center')
 			kld = np.zeros(X_design.shape[0])
 			mu, sigma = self.get_mu_sigma(self.model, self.X, self.Y)
@@ -613,24 +617,24 @@ class KLSampler(object):
 			sigma_qoi.append(sigma)
 			models.append(self.model)
 			models_us.append(self.model_d)
-			print '>... current mean and variance of the QoI for EKLD', mu, sigma
+			print('>... current mean and variance of the QoI for EKLD', mu, sigma)
 			if comp:
 				mu_qoi_us, sigma_qoi_us = self.get_mu_sigma(self.model_d, self.X_u, self.Y_u)
 				mu_us.append(mu_qoi_us)
 				sigma_us.append(sigma_qoi_us)
-				print '>... current mean and variance of the QoI for US', mu_qoi_us, sigma_qoi_us
+				print('>... current mean and variance of the QoI for US', mu_qoi_us, sigma_qoi_us)
 			if self.mcmc_model:
 				num_lhs_ego = int(self._ego_init)
 				num_seq_ego = int(self._ego_seq)
 				ekld_mu = np.ndarray((num_lhs_ego, 1))
 				ekld_var = np.ndarray((num_lhs_ego, 1))
 				ego_lhs = lhs(self.X.shape[1], num_lhs_ego, criterion='center')
-				print '>... computing the EKLD for the initial EGO designs.'
-				for it in xrange(num_lhs_ego):
+				print('>... computing the EKLD for the initial EGO designs.')
+				for it in range(num_lhs_ego):
 					ekld_mu[it, ], ekld_var[it, ] = self.mcmc_kld(ego_lhs[it, :], model=self.model)
 				ego_model = self.make_model(ego_lhs, ekld_mu, mcmc=False)
-				print '>... done.'
-				for _ in xrange(num_seq_ego):
+				print('>... done.')
+				for _ in range(num_seq_ego):
 					X_design = lhs(self.X.shape[1], num_designs)
 					ego_max = max(ego_model[0].predict(ego_lhs, full_cov=False, include_likelihood=False)[0])
 					mu_ekld, sigma_ekld = ego_model[0].predict(X_design, full_cov=False, include_likelihood=False)
@@ -641,14 +645,14 @@ class KLSampler(object):
 					ego_lhs = np.vstack([ego_lhs, np.atleast_2d(x_best_ego)])
 					ekld_mu = np.vstack([ekld_mu, np.atleast_2d(y_obs_ego)])
 					ekld_var = np.vstack([ekld_var, np.atleast_2d(y_var_ego)])
-					print '>... reconstructing EKLD surrogate model.'
+					print('>... reconstructing EKLD surrogate model.')
 					ego_model = self.make_model(ego_lhs, ekld_mu, mcmc=False)
-					print '>... done.'
+					print('>... done.')
 			else:
 				val_trunc, vec_trunc, W_h, x_d, phi_x_dx = self.eig_val_vec(model=self.model)
-				for j in xrange(X_design.shape[0]):
+				for j in range(X_design.shape[0]):
 					if verbose>0:
-						print "> ... computing the EKLD for design no.", j
+						print("> ... computing the EKLD for design no.", j)
 					kld[j] = self.avg_kld_mean(X_design[j, :], val_trunc, vec_trunc, W_h, x_d, phi_x_dx, model=self.model)
 					kld_all[i, j] = kld[j]
 			if self.mcmc_model:
@@ -658,19 +662,19 @@ class KLSampler(object):
 				rel_kld[i, ] = max(np.exp(mu_ekld))
 				kld_all [i, :] = np.exp(mu_ekld[:, 0])
 				if verbose>0:
-					print '>... maximum EKLD', max(np.exp(ekld_mu))
+					print('>... maximum EKLD', max(np.exp(ekld_mu)))
 			else:
 				idx_best = np.argmax(kld)
 				rel_kld[i, ] = max(kld)
 				kld_all[i, :] = 1. * kld_all[i, :]
 				x_best = X_design[idx_best, ]
 				if verbose>0:
-					print '>... maximum EKLD: ', max(kld)
+					print('>... maximum EKLD: ', max(kld))
 			if verbose>0:
-				print '>... run the next experiment at design: ', x_best
+				print('>... run the next experiment at design: ', x_best)
 			y_obs = self.obj_func(x_best)
 			if verbose>0:
-				print '>... simulated the output at the selected design: ', y_obs
+				print('>... simulated the output at the selected design: ', y_obs)
 			if plots>0:
 				if self.mcmc_model:
 					self.make_plots(i, np.exp(mu_ekld), X_design, x_best, y_obs, model=self.model, ekld_model=ego_model, comp_plots=comp_plots)
@@ -680,7 +684,7 @@ class KLSampler(object):
 			if comp:
 				self.update_comp_models(it=i+1)
 			if verbose>0:
-				print '>... reconstructing surrogate model(s)'
+				print('>... reconstructing surrogate model(s)')
 			self.model = self.make_model(self.X, self.Y, it=i+1, mcmc=self.mcmc_model, last_model=self.model)
 			if not self.mcmc_model:
 				self.get_val_vec = self.eig_val_vec(model=self.model) # Generate different eigenvalues and eigenvectors as new data arrives
@@ -695,11 +699,11 @@ class KLSampler(object):
 					sigma_us.append(sigma_qoi_us)
 					models_us.append(self.model_d)
 			if (max(kld) / max(rel_kld)) < self.kld_tol:
-				print '>... relative ekld below specified tolerance ... stopping optimization now.'
+				print('>... relative ekld below specified tolerance ... stopping optimization now.')
 				break
 		if comp:
 			if self.mcmc_model:
 				return self.X, self.Y, self.X_u, kld_all, X_design, mu_qoi, sigma_qoi, (mu_us, sigma_us, models, models_us)
-			else:	
+			else:
 				return self.X, self.Y, self.X_u, kld_all, X_design, mu_qoi, sigma_qoi, (mu_us, sigma_us)
 		return self.X, self.Y, self.Y_u, kld_all, X_design, mu_qoi, sigma_qoi

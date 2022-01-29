@@ -1,3 +1,4 @@
+from __future__ import print_functions
 import matplotlib
 matplotlib.use('agg')
 import numpy as np
@@ -30,7 +31,7 @@ class Ex1Func(object):
     def __call__(self, x):
 	    """
 	    Branin-Hoo function scaled to [0, 1]^2 used in Picheny et al. (2012).
-	    Picheny, Victor, Tobias Wagner, and David Ginsbourger. "A benchmark of kriging-based infill criteria for noisy optimization." 
+	    Picheny, Victor, Tobias Wagner, and David Ginsbourger. "A benchmark of kriging-based infill criteria for noisy optimization."
 	    Structural and Multidisciplinary Optimization 48, no. 3 (2013): 607-626.
 	    """
 	    x1 = 15. * x[0] - 5.
@@ -45,7 +46,7 @@ class Ex2Func(object):
     def __call__(self, x):
 	    """
 	    Branin-Hoo function scaled to [0, 1]^2 used in Picheny et al. (2012).
-	    Picheny, Victor, Tobias Wagner, and David Ginsbourger. "A benchmark of kriging-based infill criteria for noisy optimization." 
+	    Picheny, Victor, Tobias Wagner, and David Ginsbourger. "A benchmark of kriging-based infill criteria for noisy optimization."
 	    Structural and Multidisciplinary Optimization 48, no. 3 (2013): 607-626.
 	    """
 	    x1 = 2 * x[0] + 0.5
@@ -59,10 +60,10 @@ class Ex3Func(object):
     def __call__(self, x):
 	    """
 	    Forrestor et. al. function.
-	    Picheny, Victor, Tobias Wagner, and David Ginsbourger. "A benchmark of kriging-based infill criteria for noisy optimization." 
+	    Picheny, Victor, Tobias Wagner, and David Ginsbourger. "A benchmark of kriging-based infill criteria for noisy optimization."
 	    Structural and Multidisciplinary Optimization 48, no. 3 (2013): 607-626.
 	    """
-	    y = (6. * x[0] - 2) ** 2 * math.sin(12 * x[0] - 4) 
+	    y = (6. * x[0] - 2) ** 2 * math.sin(12 * x[0] - 4)
 	    return y
 
 class Ex4Func(object):
@@ -75,7 +76,7 @@ class Ex4Func(object):
 	    grammacy
 	    """
 	    x1 = 8 * x - 2
-	    y = x1[0] * np.exp(-((x1[0] ** 2) + (x1[1] ** 2))) 
+	    y = x1[0] * np.exp(-((x1[0] ** 2) + (x1[1] ** 2)))
 	    return y
 
 class Ex5Func(object):
@@ -128,8 +129,8 @@ if __name__ == '__main__':
 	# quad_points_weight = 1. / np.sqrt(abs(quad_points-0.5)) 		 			# Middle heavy
 	x_hyp = np.array([[.6]])
 	kls = KLSampler(X_init, Y_init, x_hyp,
-		model_kern=GPy.kern.RBF, 
-		bounds=[(0, 1)] * X_init.shape[1], 
+		model_kern=GPy.kern.RBF,
+		bounds=[(0, 1)] * X_init.shape[1],
 		obj_func=objective,
 		true_func=objective_true,
 		noisy=False,

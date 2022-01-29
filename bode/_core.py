@@ -23,7 +23,7 @@ class JeffreysPrior(object):
 			return -np.inf
 		return -1 * np.log(param)
 	def sample(self, size=1):
-		print "Cannot sample from JeffreysPrior! Choose another prior over this parameter."
+		print("Cannot sample from JeffreysPrior! Choose another prior over this parameter.")
 		sys.exit(1)
 
 class BetaPrior(object):
