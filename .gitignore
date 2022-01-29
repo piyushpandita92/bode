@@ -4,10 +4,11 @@
 ## Python
 __pycache__/
 *.py[cod]
+*.npy
+*.png
 
 ## 2to3 conversion
 *.bak
 
 ## venvs
 *.egg-info/
-
