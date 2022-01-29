@@ -1,6 +1,7 @@
 # bode
+This module is called BODE.
 Bayesian Optimal Design of Experiments 
-This module is called bode.
+
 
 Bayesian Optimal Design of Experiments for Inferring the Expected Value of a Black-box Function, the following paper:
 https://arxiv.org/pdf/1807.09979.pdf
